@@ -1,10 +1,13 @@
 package calendar;
 
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
+import java.time.temporal.TemporalField;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Scanner;
@@ -17,7 +20,12 @@ import java.util.Scanner;
  */
 public class CalendarView
 {
-
+	// scanner for input
+	public Scanner scanner = new Scanner(System.in);
+	// constructor
+	public CalendarView(){}
+	
+	
 	/** abbreviated System.out.print
 	 * @param s
 	 */
@@ -33,11 +41,6 @@ public class CalendarView
 	{
 		System.out.println(s);
 	}
-
-	// scanner for input
-	public Scanner scanner = new Scanner(System.in);
-	// constructor
-	public CalendarView(){}
 
 	/** prints message to console output
 	 * @param msg
@@ -62,19 +65,21 @@ public class CalendarView
 	{
 		return scanner.nextLine();
 	}
+	
 
 	/**
 	 * Displays one month on a calendar to console in typical calendar format
+	 * Days with reminders are marked with an asterisk.
+	 * Today is surrounded with brackets.
+	 * 
 	 * @param ldt 				- LocalDateTime representing whatever month you want to print
 	 * @param daysWithReminders - list of days that contain a reminder. 
 	 */
 	public void displayCalendar(LocalDateTime ldt, ArrayList<Integer> daysWithReminders)
 	{
-		Calendar cal = Calendar.getInstance();
-		cal.set(ldt.getYear(), ldt.getMonthValue()-1, ldt.getDayOfMonth());
-		
 		// format for month names
-		DateTimeFormatter monthFormat = DateTimeFormatter.ofPattern("MMM");
+		DateTimeFormatter ThreeLetterMonth = DateTimeFormatter.ofPattern("MMM");
+		DateTimeFormatter FourLetterMonth = DateTimeFormatter.ofPattern("MMMM");
 		Month thisMonth = Month.of(ldt.getMonthValue());
 		int temp = ldt.getMonthValue()+1;
 		if (temp > 12) { temp = 1; } // make sure next isn't out of bounds
@@ -84,28 +89,28 @@ public class CalendarView
 		Month previous = Month.of(temp);
 		
 		// print previous and next month names
-		sopl(" < " + monthFormat.format(previous) + "\t\t\t    " +  monthFormat.format(next) + " >\n");
+		sopl("\n < " + ThreeLetterMonth.format(previous) + "\t\t\t    " +  ThreeLetterMonth.format(next) + " >\n");
 		// print current month name and year
-		sopl(" " + monthFormat.format(thisMonth) + " " + ldt.getYear());
+		sopl(" " + FourLetterMonth.format(thisMonth) + " " + ldt.getYear());
 		// print month names
 		sopl(" Su   Mo   Tu   We   Th   Fr   Sa");
 
 		// print correct spacing before first day
-		//LocalDateTime firstDayOfWeek = new LocalDateTime
-		for (int i = 0; i < ldt.getDayOfWeek().getValue(); ++i)
+		int firstDayOfMonth = (ldt.with(TemporalAdjusters.firstDayOfMonth()).getDayOfWeek().getValue())%7;
+		for (int i = 0; i < firstDayOfMonth; ++i)
 		{
-			sop("    ");
+			sop("     "); // 5 spaces
 		}
 
-		int i = cal.get(Calendar.DAY_OF_WEEK) - 1; // offset based on where in the week the first day falls
+		int i = firstDayOfMonth; // offset based on where in the week the first day falls
 		int day = 1;
-		int maxDay = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+		int lastDay = ldt.with(TemporalAdjusters.lastDayOfMonth()).getDayOfMonth();
 
-		while (day <= maxDay)
+		while (day <= lastDay)
 		{
-			if (!today(day, cal))
-				sop(" ");
-			while (i < 7 && day <= maxDay)
+			if (!today(day, ldt))
+				sop(" "); // space for alignment
+			while (i < 7 && day <= lastDay)
 			{
 				String dayStr = day + "";
 				// add asterisk if day has reminder.
@@ -114,12 +119,12 @@ public class CalendarView
 					dayStr = day + "*";
 				}
 				// bracket day if it equals current day
-				if (today(day, cal))
+				if (today(day, ldt))
 				{
 					sop(String.format("%1$-6s", "[" + dayStr + "]"));
 				}
 				// one less space if day == tomorrow
-				else if (tomorrow(day, cal))
+				else if (tomorrow(day, ldt))
 				{
 					sop(String.format("%1$-4s", dayStr));
 				} else
@@ -138,26 +143,27 @@ public class CalendarView
 	/**
 	 * Helper function for displayCalendar returns true if the day is today
 	 * @param day
-	 * @param cal
+	 * @param ldt
 	 */
-	private boolean today(int day, Calendar cal)
+	private boolean today(int day, LocalDateTime ldt)
 	{
 		// calendar for current date
-		Calendar currentDate = Calendar.getInstance();
-		return (day == currentDate.get(Calendar.DAY_OF_MONTH)
-				&& cal.get(Calendar.MONTH) == currentDate.get(Calendar.MONTH)
-				&& cal.get(Calendar.YEAR) == currentDate.get(Calendar.YEAR));
+		LocalDateTime now = LocalDateTime.now();
+		// return true if day, month and year are the same
+		return (day == now.getDayOfMonth() 
+				&& ldt.getMonthValue() == now.getMonthValue()
+				&& ldt.getYear() == now.getYear());
 
 	}
 
 	/**
 	 * Helper function for displayCalendar returns true if the day is tomorrow
 	 * @param day
-	 * @param cal
+	 * @param ldt
 	 */
-	private boolean tomorrow(int day, Calendar cal)
+	private boolean tomorrow(int day,  LocalDateTime ldt)
 	{
-		return today(day + 1, cal);
+		return today(day + 1, ldt);
 	}
 
 }
