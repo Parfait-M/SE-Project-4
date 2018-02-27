@@ -1,6 +1,11 @@
+package calendar;
+
 // need to import Alarm
 import java.time.*;
 import java.util.*;
+
+import se.reminder.Alarm;
+
 import java.io.*;
 
 class Model {
@@ -220,7 +225,7 @@ class Model {
     return as;
   }
 
-  private String randString(Random r) {
+  private static String randString(Random r) {
     int i = r.nextInt(26+26+5);
     if (i >= 26 + 26) return "";
     else if (0 <= i && i < 26) return randString(r) + (char)('a' + i);
