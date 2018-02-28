@@ -14,26 +14,28 @@ public class CalendarController
 {
 	public static CalendarView view = new CalendarView();
 	public static Model model;
-	
+
 	CalendarController()
 	{
 		try
 		{
 			model = new Model();
-		} catch (ClassNotFoundException | IOException e)
+		}
+
+		catch (ClassNotFoundException | IOException e)
 		{
 			view.showMessageNL("Error opening file");
 			System.exit(0);
 		}
-
 	}
 
 
-		/** MenuThread
-		 * @author Zachary
+		/*
+		 * MenuThread
+		 * @author Adam
 		 * Manages interactive menu for the user.
-		 *
 		 */
+
 		public static class MenuThread extends Thread
 		{
 			public MenuThread() {}
@@ -45,13 +47,16 @@ public class CalendarController
 				// menu loop
 				while(true)
 				{
+					// TODO Print Calendar
+					
+
 					view.showMessageNL("\n\tMenu\n"
 							+ "1. Create a new reminder\n"
 							+ "2. Edit upcoming reminder\n"
 							+ "3. View missed reminders\n"
 							+ "4. Exit");
 
-					String choice = (String)view.getInput(DataType.STRING);
+					String choice = (String)view.getInput();
 					switch (choice)
 					{
 						case "1": c.makeRem(); break;
@@ -59,15 +64,6 @@ public class CalendarController
 						case "3": c.showPastRem(); break;
 						case "4":
 							view.showMessageNL("Goodbye!");
-							try {
-								model.saveAlarms();
-							} catch (FileNotFoundException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							} catch (IOException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
 							System.exit(0);
 						default: view.showMessageNL("Invalid input");
 					}
