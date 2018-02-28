@@ -4,7 +4,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
-import com.reminder.*;
+
+import se.reminder.Controller;
 
 /** Controller
  * Contains 2 threads, one for looping through the menu,
@@ -22,7 +23,7 @@ public class CalendarController
 			model = new Model();
 		}
 
-		catch (ClassNotFoundException | IOException e)
+		catch (Exception e)
 		{
 			view.showMessageNL("Error opening file");
 			System.exit(0);
@@ -77,4 +78,5 @@ public class CalendarController
 		new MenuThread().start();
 	}
 
+}
 }
