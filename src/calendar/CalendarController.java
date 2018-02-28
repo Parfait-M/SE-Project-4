@@ -48,6 +48,7 @@ public class CalendarController
 				while(true)
 				{
 					// TODO Print Calendar
+					
 
 					view.showMessageNL("\n\tMenu\n"
 							+ "1. Create a new reminder\n"
