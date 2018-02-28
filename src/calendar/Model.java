@@ -1,6 +1,5 @@
 package calendar;
 
-// need to import Alarm
 import java.time.*;
 import java.util.*;
 
@@ -12,28 +11,24 @@ class Model {
 
   private static interface Sort { public int s(Alarm a, Alarm b); }
 
-  private static int partition(Alarm[] as, Sort s, int lo, int hi) {
-    Alarm p = as[hi];
-    int pi = lo;
-
-    for (int i = lo; i < hi; ++i) {
-      if (s.s(p,as[i]) >= 0) {
-        Alarm t = as[i];
-        as[i] = as[pi];
-        as[pi] = t;
-        ++pi;
-      }
-    }
-
-    Alarm t = as[hi];
-    as[hi] = as[pi];
-    as[pi] = t;
-
-    return pi;
-  }
   private static void sort(Alarm[] as, Sort s, int lo, int hi) {
     if (lo < hi) {
-      int p = partition(as,s,lo,hi);
+      Alarm part = as[hi];
+      int p = lo;
+
+      for (int i = lo; i < hi; ++i) {
+        if (s.s(part,as[i]) >= 0) {
+          Alarm t = as[i];
+          as[i] = as[p];
+          as[p] = t;
+          ++p;
+        }
+      }
+
+      Alarm t = as[hi];
+      as[hi] = as[p];
+      as[p] = t;
+
       sort(as,s,lo,p-1);
       sort(as,s,p+1,hi);
     }
@@ -61,6 +56,35 @@ class Model {
     return as;
   }
 
+  public static ArrayList<Alarm> matchDate(ArrayList<Alarm> as, LocalDate d) {
+    String ds = d.toString();
+    ArrayList<Alarm> bs = new ArrayList<Alarm>();
+    for (Alarm a : as) {
+      if (a.getDate().toString().equals(ds)) {
+        bs.add(a);
+      }
+    }
+    return bs;
+  }
+  public static ArrayList<Alarm> matchMonth(ArrayList<Alarm> as, int m, int y) {
+    ArrayList<Alarm> bs = new ArrayList<Alarm>();
+    for (Alarm a : as) {
+      if (m == a.getMonth() && y == a.getYear()) {
+        bs.add(a);
+      }
+    }
+    return bs;
+  }
+  public static ArrayList<Alarm> matchYear(ArrayList<Alarm> as, int y) {
+    ArrayList<Alarm> bs = new ArrayList<Alarm>();
+    for (Alarm a : as) {
+      if (y == a.getYear()) {
+        bs.add(a);
+      }
+    }
+    return bs;
+  }
+
   private static String randString(Random r) {
     int i = r.nextInt(26+26+5);
     if (i >= 26 + 26) return "";
@@ -68,8 +92,8 @@ class Model {
     else return randString(r) + (char)('A' + i - 26);
   }
   private static Alarm[] rand(int l, Random r) {
-    Alarm[] as = new Alarm[l];
-    for (int i = 0; i < as.length; ++i) {
+    Alarm[] a = new Alarm[l];
+    for (int i = 0; i < a.length; ++i) {
       String s = randString(r);
       int year = 1950 + r.nextInt(100);
       int month = 1 + r.nextInt(12);
@@ -77,11 +101,10 @@ class Model {
       int hour = r.nextInt(23);
       int min = r.nextInt(59);
 
-      as[i] = new Alarm(s, year, month, day, hour, min);
+      a[i] = new Alarm(s, year, month, day, hour, min);
     }
-    return as;
+    return a;
   }
-
   private static void print(Alarm[] a) {
     for (int i = 0; i < a.length; ++i) {
       System.out.printf("%s %s\n", a[i].getDate_time(), a[i].getName());
@@ -91,12 +114,48 @@ class Model {
   public static void main(String[] a) {
     Random r = new Random();
 
-    int l = Integer.parseInt(a[1]);
-    switch(a[0]) {
-      case "name": print(sortByName(rand(l,r))); return;
-      case "time": print(sortByTime(rand(l,r))); return;
-      case "date": print(sortByDateTime(rand(l,r))); return;
-      default: print(rand(l,r)); return;
+    int l = Integer.parseInt(a[0]);
+
+    Alarm[] array = rand(l,r);
+    ArrayList<Alarm> list = new ArrayList<Alarm>(Arrays.asList(array));
+
+    int year = 1950 + r.nextInt(100);
+    int month = 1 + r.nextInt(12);
+    int day = 1 + r.nextInt(28);
+    LocalDate ld = LocalDate.of(year, month, day);
+
+    switch(a[1]) {
+    case "date":
+      System.out.printf("Date: %s\n", ld);
+
+      list = matchDate(list,ld);
+      array = new Alarm[list.size()];
+      list.toArray(array);
+      break;
+
+    case "month":
+      System.out.printf("Year-Month: %d-%d\n", year, month);
+      list = matchMonth(list,month,year);
+      array = new Alarm[list.size()];
+      list.toArray(array);
+      break;
+
+    case "year":
+      System.out.printf("Year: %d\n", year);
+
+      list = matchYear(list,year);
+      array = new Alarm[list.size()];
+      list.toArray(array);
+      break;
+
+    default: break;
+    }
+
+    switch(a[2]) {
+      case "name": print(sortByName(array)); return;
+      case "time": print(sortByTime(array)); return;
+      case "date": print(sortByDateTime(array)); return;
+      default: print(array); return;
     }
   }
 }
