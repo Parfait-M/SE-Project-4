@@ -8,10 +8,7 @@ import java.util.ArrayList;
 import se.reminder.Alarm;
 import se.reminder.Controller;
 
-/** Controller
- * Contains 2 threads, one for looping through the menu,
- * and one for checking if any reminders/alarms will go off.
- */
+
 public class CalendarController
 {
 	public static CalendarView view = new CalendarView();
@@ -47,7 +44,7 @@ public class CalendarController
 				Controller c = new Controller();
 				c.startChecking();
 				LocalDateTime ldt = LocalDateTime.now();
-				
+
 				// menu loop
 				while(true)
 				{
@@ -60,7 +57,7 @@ public class CalendarController
 							intList.add(a.getDay());
 						}
 					}
-					view.displayCalendar(ldt, intList);					
+					view.displayCalendar(ldt, intList);
 
 					view.showMessageNL("\n\tMenu\n"
 							+ "1: Change Month\n"
@@ -71,7 +68,7 @@ public class CalendarController
 							+ "<: Previous Month\n"
 							+ "5: Exit\n"
 							+ "Enter Option: ");
-					
+
 					String choice = (String)view.getInput();
 					switch (choice)
 					{
@@ -79,17 +76,17 @@ public class CalendarController
 						case "2": c.makeRem(); break;
 						case "3": c.editRem(); break;
 						case "4": c.showPastRem(); break;
-						case ">": ldt = ldt.plusMonths(1); break; 
+						case ">": ldt = ldt.plusMonths(1); break;
 						case "<": ldt = ldt.minusMonths(1); break;
 						case "5":
 							view.showMessageNL("Goodbye!");
 							System.exit(0);
 						default: view.showMessageNL("Invalid input");
 					}
-					
+
 				}
 		}
-			
+
 			private static LocalDateTime changeMonth()
 			{
 				String date = "";
