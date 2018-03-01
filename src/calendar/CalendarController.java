@@ -4,7 +4,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
-import se.reminder.*;
+
+import se.reminder.Alarm;
+import se.reminder.Controller;
 
 /** Controller
  * Contains 2 threads, one for looping through the menu,
@@ -43,71 +45,73 @@ public class CalendarController
 			public void run()
 			{
 				Controller c = new Controller();
-				ArrayList<Alarm> alarms;
-				ArrayList<Integer> days;
-				Integer[] array;
 				c.startChecking();
+				LocalDateTime ldt = LocalDateTime.now();
+				
 				// menu loop
 				while(true)
 				{
-					alarms = c.getUpcomingAlarms();
-					days.clear();
-					LocalDate month = LocalDate.now();
+					ArrayList<Integer> intList = new ArrayList<Integer>();
+					ArrayList<Alarm> alarms = Model.matchMonth(c.getUpcomingRem(),
+							ldt.getMonthValue(), ldt.getYear());
 
-					for(int i = 0; i < alarms.size(); i++)
-					{
-						Integer day = alarms.get(i).getDate_Time().getDayOfMonth();
-						days.add(day);
+					for(Alarm a : alarms) {
+						if(a.getMonth() == ldt.getMonthValue()) {
+							intList.add(a.getDay());
+						}
 					}
-
-					// TODO Print Calendar
-					model.displayCalendar(month, days);
-
+					view.displayCalendar(ldt, intList);					
 
 					view.showMessageNL("\n\tMenu\n"
 							+ "1: Change Month\n"
 							+ "2: Create a new reminder\n"
 							+ "3: Edit an upcoming reminder\n"
 							+ "4: View missed reminders\n"
+							+ ">: Next Month\n"
+							+ "<: Previous Month\n"
 							+ "5: Exit\n"
 							+ "Enter Option: ");
-
+					
 					String choice = (String)view.getInput();
 					switch (choice)
 					{
-						case "1": month = changeMonth(); break;
+						case "1": ldt = changeMonth(); break;
 						case "2": c.makeRem(); break;
 						case "3": c.editRem(); break;
 						case "4": c.showPastRem(); break;
+						case ">": ldt = ldt.plusMonths(1); break; 
+						case "<": ldt = ldt.minusMonths(1); break;
 						case "5":
 							view.showMessageNL("Goodbye!");
 							System.exit(0);
 						default: view.showMessageNL("Invalid input");
 					}
+					
 				}
 		}
-
-	private static LocalDate changeMonth()
-	{
-		String date = "";
-		LocalDate d = LocalDate.now();
-		boolean done = false;
-		while (!done)
-		{
-			view.showMessageNL("Enter the date in format YYYY-MM-DD: ");
-			date = (String)view.getInput();
-			try
+			
+			private static LocalDateTime changeMonth()
 			{
-				d = LocalDate.parse(date);
-				done = true;
-			} catch(Exception e)
-			{
-				view.showMessageNL("Invalid format...");
+				String date = "";
+				LocalDate d = LocalDate.now();
+				boolean done = false;
+				while (!done)
+				{
+					view.showMessageNL("Enter the date in format YYYY-MM-DD: ");
+					date = (String)view.getInput();
+					try
+					{
+						d = LocalDate.parse(date);
+						done = true;
+					} catch(Exception e)
+					{
+						view.showMessageNL("Invalid format...");
+					}
+				}
+				LocalTime t = LocalTime.now();
+				return LocalDateTime.of(d, t);
 			}
-		}
 
-		return d;
-	}
 
 	public static void main(String[] args)
 	{
